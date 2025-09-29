@@ -3,7 +3,7 @@ import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import * as mediasoup from "mediasoup";
-import createWorker from "./createWorker";
+import createWorker from "./createWorker.js";
 
 const app = express();
 const port = process.env.PROT || 3000;
@@ -25,7 +25,7 @@ let workers = null;
 const initMediasoup = async() => {
   workers = await createWorker();
 
-  console.log(workers)
+  // console.log(workers)
 };
 
 initMediasoup();

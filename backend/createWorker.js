@@ -7,7 +7,7 @@ export default async function createWorker() {
 
   let mediasoupWorkers = [];
 
-  for (i = 0; i < lenght; i++) {
+  for (let i = 0; i < lenght; i++) {
     const worker = await mediasoup.createWorker({
       rtcMinPort: mediasoupConfig.workerSettings.rtcMinPort,
       rtcMaxPort: mediasoupConfig.workerSettings.rtcMaxPort,
@@ -27,13 +27,27 @@ export default async function createWorker() {
       JSON.stringify(mediasoupConfig.webRtcServerOptions)
     );
 
-    console.log(webRtcServerOptions)
+    // console.log("webRtcServerOptions", webRtcServerOptions);
 
-    // // Create a WebRtcServer for this worker
-    // const webRtcServer = await worker.createWebRtcServer({
+    // Increment port manually for each worker
+    for (const listenInfo of webRtcServerOptions.listenInfos) {
+      listenInfo.port += i;
 
-    // })
+      // console.log("webRtcServerOptions", webRtcServerOptions);
+    }
+
+    // Create WebRtcServer with unique ports
+    const webRtcServer = await worker.createWebRtcServer(webRtcServerOptions);
+
+    // console.log("webRtcServer: ", webRtcServer);
+
+    // Attach the server to the worker's appData for reference
+    worker.appData.webRtcServer = webRtcServer;
+
+    mediasoupWorkers.push(worker);
+
+    console.log(`Worker ${i} created. WebRtcServer UDP/TCP port: ${webRtcServerOptions.listenInfos[0].port}`);
   }
 
-  return workers;
+  return mediasoupWorkers;
 }
