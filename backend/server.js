@@ -4,6 +4,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import * as mediasoup from "mediasoup";
 import createWorker from "./createWorker.js";
+import mediasoupConfig from "./config/mediasoupConfig.js";
 
 const app = express();
 const port = process.env.PROT || 3000;
@@ -21,11 +22,15 @@ const io = new Server(httpServer, {
 });
 
 let workers = null;
+let router = null;
 
 const initMediasoup = async() => {
   workers = await createWorker();
 
-  // console.log(workers)
+  // console.log(workers[0].appData)
+
+  // now we got only one worker
+  router.workers[0].createRouter({mediaCodecs: mediasoupConfig.routerOptions.mediaCodecs})
 };
 
 initMediasoup();

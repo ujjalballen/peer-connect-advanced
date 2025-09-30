@@ -46,7 +46,25 @@ export default async function createWorker() {
 
     mediasoupWorkers.push(worker);
 
-    console.log(`Worker ${i} created. WebRtcServer UDP/TCP port: ${webRtcServerOptions.listenInfos[0].port}`);
+    console.log(
+      `Worker ${i} created. WebRtcServer UDP/TCP port: ${webRtcServerOptions.listenInfos[0].port}`
+    );
+
+    // Inside your for-loop after worker + webRtcServer setup
+    // setInterval(async () => {
+    //   try {
+    //     const usage = await worker.getResourceUsage();
+    //     console.log(`Worker ${i} [pid:${worker.pid}] resource usage:`, usage);
+
+    //     const dump = await worker.dump();
+    //     console.log(`Worker ${i} [pid:${worker.pid}] dump:`, dump);
+    //   } catch (err) {
+    //     console.error(
+    //       `Failed to fetch worker resource usage for worker ${i}:`,
+    //       err
+    //     );
+    //   }
+    // }, 30000); // every 2 minutes
   }
 
   return mediasoupWorkers;
