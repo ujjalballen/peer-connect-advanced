@@ -30,7 +30,7 @@ const initMediasoup = async() => {
   // console.log(workers[0].appData)
 
   // now we got only one worker
-  router.workers[0].createRouter({mediaCodecs: mediasoupConfig.routerOptions.mediaCodecs})
+  router = await workers[0].createRouter({mediaCodecs: mediasoupConfig.routerOptions.mediaCodecs})
 };
 
 initMediasoup();
