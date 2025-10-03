@@ -13,11 +13,15 @@ socket.on("disconnect", () => {
 });
 
 
-const joinNewRoom = () => {
+const joinNewRoom = async() => {
   const roomName = document.getElementById("room-input").value;
   const userName = document.getElementById("username").value;
 
   console.log("userName:", userName, "roomName: ", roomName);
+
+  const joinRoomResp = await socket.emitWithAck('joinRoom', {roomName, userName})
+
+  console.log('joinRoom', joinRoomResp)
 };
 
 buttons.joinRoom.addEventListener("click", joinNewRoom);
