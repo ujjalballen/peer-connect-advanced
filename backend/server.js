@@ -45,7 +45,7 @@ io.on("connection", (socket) => {
   let client; // this client object will available to all our socket listener
 
   socket.on("joinRoom", ({ roomName, userName }, cb) => {
-    client = new Client();
+    client = new Client(userName, socket, router);
   });
 });
 
