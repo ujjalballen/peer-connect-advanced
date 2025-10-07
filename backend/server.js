@@ -7,6 +7,7 @@ import createWorker from "./createWorker.js";
 import mediasoupConfig from "./config/mediasoupConfig.js";
 import Client from "./classes/Client.js";
 import Room from "./classes/Room.js";
+import getWorker from "./getWorker.js";
 
 const app = express();
 const port = process.env.PROT || 3000;
@@ -24,17 +25,21 @@ const io = new Server(httpServer, {
 });
 
 let workers = null;
-let router = null;
+
+// now router is managed by Room Object(not with 0 worker)
+
+// master room array that contains all Room object
+const rooms = [];
 
 const initMediasoup = async () => {
   workers = await createWorker();
 
   // console.log(workers[0].appData)
 
-  // now we got only one worker
-  router = await workers[0].createRouter({
-    mediaCodecs: mediasoupConfig.routerOptions.mediaCodecs,
-  });
+  // router move to the Room level==>
+  // router = await workers[0].createRouter({
+  //   mediaCodecs: mediasoupConfig.routerOptions.mediaCodecs
+  // });
 };
 
 initMediasoup();
@@ -44,8 +49,26 @@ io.on("connection", (socket) => {
 
   let client; // this client object will available to all our socket listener
 
-  socket.on("joinRoom", ({ roomName, userName }, cb) => {
+  socket.on("joinRoom", async({ roomName, userName }, cb) => {
     client = new Client(userName, socket, router);
+    console.log("This is our Client Object: ", client)
+    
+    let requestedRoom = rooms.find((room) => room.roomName === roomName);
+    if(!requestedRoom){
+      // we will make rooms, add a worker, add a router;
+
+      const workerToUse = await getWorker(workers);
+      console.log('Get new Worker for this ROOM: ', workerToUse);
+
+      requestedRoom = new Room(roomName, workerToUse);
+      console.log('get the Room OBJECT and its FN: ', requestedRoom);
+      await requestedRoom.createRouter();
+
+      // push the new Room to the rooms object;
+      rooms.push(requestedRoom)
+    };
+
+
   });
 });
 
