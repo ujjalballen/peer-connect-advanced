@@ -49,26 +49,45 @@ io.on("connection", (socket) => {
 
   let client; // this client object will available to all our socket listener
 
-  socket.on("joinRoom", async({ roomName, userName }, cb) => {
-    client = new Client(userName, socket, router);
-    console.log("This is our Client Object: ", client)
-    
+  socket.on("joinRoom", async ({ roomName, userName }, cb) => {
+    let newRoom = false;
+    client = new Client(userName, socket);
+    console.log("This is our Client Object: ", client);
+
     let requestedRoom = rooms.find((room) => room.roomName === roomName);
-    if(!requestedRoom){
+    if (!requestedRoom) {
+      newRoom = true;
       // we will make rooms, add a worker, add a router;
 
       const workerToUse = await getWorker(workers);
-      console.log('Get new Worker for this ROOM: ', workerToUse);
+      console.log("Get new Worker for this ROOM: ", workerToUse);
 
       requestedRoom = new Room(roomName, workerToUse);
-      console.log('get the Room OBJECT and its FN: ', requestedRoom);
+      console.log("get the Room OBJECT and its FN: ", requestedRoom);
       await requestedRoom.createRouter();
 
       // push the new Room to the rooms object;
-      rooms.push(requestedRoom)
-    };
+      rooms.push(requestedRoom);
+    }
+
+    // add the new room to the client Object;
+    client.room = requestedRoom;
+
+    // add the client to the Room clients;
+    client.room.addClient(client);
+    console.log("get New Client clients inside: ", client.room.clients[0].room);
+
+    // add this socket to the socket room;
+    socket.join(client.room.roomName);
 
 
+    //PLACEHOLDER.............. come back, we will get all current producer..
+    
+
+    cb({
+      routerRtpCapabilities: client.room.router.rtpCapabilities,
+      newRoom
+    })
   });
 });
 

@@ -23,3 +23,36 @@ async function getWorker(workers) {
 }
 
 export default getWorker;
+
+
+
+
+
+/* 
+
+3️⃣ Hybrid Approach (Round-Robin + Load Awareness)
+
+How it works:
+
+  Default selection is round-robin.
+
+  Check load before assigning; skip overloaded workers.
+
+  If all workers busy → fallback to the least-loaded worker.
+
+Pros:
+
+  Balances fairness and performance.
+
+  Low overhead (doesn’t measure every task constantly).
+
+  Prevents overloading any single worker while still keeping distribution predictable.
+
+Cons:
+
+  Slightly more complex than pure round-robin, but very manageable.
+
+Conclusion: ✅ Best choice for production at scale.
+
+
+*/

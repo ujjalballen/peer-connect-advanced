@@ -1,9 +1,8 @@
 class Client {
-  constructor(userName, socket, router) {
+  constructor(userName, socket) {
     // Basic client info
     this.userName = userName;
     this.socket = socket;
-    this.router = router;
 
     // instead of calling it producerTransport, call it upstream.
     // THIS Transport used for sending media streams

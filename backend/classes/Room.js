@@ -25,7 +25,7 @@ class Room {
   async createRouter() {
     try {
       this.router = await this.worker.createRouter({
-        mediaCodecs: config.routerMediaCodecs,
+        mediaCodecs: mediasoupConfig.routerOptions.mediaCodecs
       });
       console.log(`Router created for room: ${this.router}`);
     } catch (err) {

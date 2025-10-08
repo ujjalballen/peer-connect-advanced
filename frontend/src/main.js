@@ -8,6 +8,7 @@ socket.on("connect", () => {
   console.log("✅ Connected to server with id:", socket.id);
 });
 
+
 socket.on("disconnect", () => {
   console.log("❌ Disconnected from server");
 });
@@ -23,5 +24,7 @@ const joinNewRoom = async() => {
 
   console.log('joinRoom', joinRoomResp)
 };
+
+
 
 buttons.joinRoom.addEventListener("click", joinNewRoom);
