@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 import * as mediasoupClient from "mediasoup-client";
 
 let device = null;
+let localStream = null;
 
 const socket = io("http://localhost:3000");
 
@@ -37,19 +38,32 @@ const joinNewRoom = async () => {
 
     console.log("device: ", device);
 
-
-    buttons.control.classList.remove('d-none');
-    
+    buttons.control.classList.remove("d-none");
   } catch (error) {
     if (error.name === "UnsupportedError")
       console.warn("browser not supported");
   }
 
-
   //PLACEHOLDER: ... Start making the transport for the current speaker
+};
 
+const enableFeedStream = async () => {
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true,
+    });
 
+    console.log('localStream: ', localStream)
 
+    buttons.localMediaLeft.srcObject = localStream;
+    buttons.enableFeed.disabled = true;
+    buttons.sendFeed.disabled = false;
+
+  } catch (error) {
+    console.log("localStream error: ", error);
+  }
 };
 
 buttons.joinRoom.addEventListener("click", joinNewRoom);
+buttons.enableFeed.addEventListener("click", enableFeedStream);
