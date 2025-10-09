@@ -52,18 +52,19 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", async ({ roomName, userName }, cb) => {
     let newRoom = false;
     client = new Client(userName, socket);
-    console.log("This is our Client Object: ", client);
+    // console.log("This is our Client Object: ", client);
 
     let requestedRoom = rooms.find((room) => room.roomName === roomName);
     if (!requestedRoom) {
       newRoom = true;
+      
       // we will make rooms, add a worker, add a router;
-
       const workerToUse = await getWorker(workers);
-      console.log("Get new Worker for this ROOM: ", workerToUse);
+      // console.log("Get new Worker for this ROOM: ", workerToUse);
 
       requestedRoom = new Room(roomName, workerToUse);
-      console.log("get the Room OBJECT and its FN: ", requestedRoom);
+      // console.log("get the Room OBJECT and its FN: ", requestedRoom);
+
       await requestedRoom.createRouter();
 
       // push the new Room to the rooms object;
@@ -75,7 +76,7 @@ io.on("connection", (socket) => {
 
     // add the client to the Room clients;
     client.room.addClient(client);
-    console.log("get New Client clients inside: ", client.room.clients[0].room);
+    console.log(`Room Name: ${roomName} : Total Active Clients: ${client.room.clients.length}`);
 
     // add this socket to the socket room;
     socket.join(client.room.roomName);
