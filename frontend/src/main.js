@@ -41,6 +41,8 @@ const joinNewRoom = async () => {
     });
 
     console.log("device: ", device);
+//     const sctpCapabilities = device.sctpCapabilities;
+// console.log("sctpCapabilities: ", sctpCapabilities)
 
     buttons.control.classList.remove("d-none");
   } catch (error) {

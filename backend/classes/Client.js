@@ -1,3 +1,5 @@
+import mediasoupConfig from "../config/mediasoupConfig.js";
+
 class Client {
   constructor(userName, socket) {
     // Basic client info
@@ -21,6 +23,49 @@ class Client {
 
     // this.rooms = []
     this.room = null; // this will be a Room object
+  }
+
+  addTransport(type) {
+    return new Promise(async (resolve, reject) => {
+      const { initialAvailableOutgoingBitrate, maxIncomingBitrate } =
+        mediasoupConfig.webRtcTransport;
+      const transport = await this.room.router.createWebRtcTransport({
+        webRtcServer: this.room.worker.appData.webRtcServer,
+        enableUdp: true,
+        enableTcp: true, // used used UDP, unless we can't;
+        preferUdp: true,
+        initialAvailableOutgoingBitrate,
+      });
+
+      console.log("webTRCServer from Client: ", this.room.worker.appData.webRtcServer)
+
+
+      if (maxIncomingBitrate) {
+        // maxIncomingBitrate limit the incoming bandwidth from this transport
+        try {
+          await transport.setMaxIncomingBitrate(maxIncomingBitrate);
+        } catch (error) {
+          console.log("Error Setting maxIncomingBitrate");
+        }
+      }
+
+      const clientTransportParams = {
+        id: transport.id,
+        iceParameters: transport.iceParameters,
+        iceCandidates: transport.iceCandidates,
+        dtlsParameters: transport.dtlsParameters,
+      };
+
+
+      if(type === "producer"){
+        // set the new transport to the client's upstreamTransport = producerTransport
+        this.upstreamTransport = transport;
+      }else if(type === "consumer"){
+
+      }
+
+      resolve(clientTransportParams)
+    });
   }
 }
 

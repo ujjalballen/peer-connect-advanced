@@ -49,7 +49,7 @@ io.on("connection", (socket) => {
 
   let client; // this client object will available to all our socket listener
 
-  socket.on("joinRoom", async ({ roomName, userName }, cb) => {
+  socket.on("joinRoom", async ({ roomName, userName }, ackCb) => {
     let newRoom = false;
     client = new Client(userName, socket);
     // console.log("This is our Client Object: ", client);
@@ -57,7 +57,7 @@ io.on("connection", (socket) => {
     let requestedRoom = rooms.find((room) => room.roomName === roomName);
     if (!requestedRoom) {
       newRoom = true;
-      
+
       // we will make rooms, add a worker, add a router;
       const workerToUse = await getWorker(workers);
       // console.log("Get new Worker for this ROOM: ", workerToUse);
@@ -76,19 +76,32 @@ io.on("connection", (socket) => {
 
     // add the client to the Room clients;
     client.room.addClient(client);
-    console.log(`Room Name: ${roomName} : Total Active Clients: ${client.room.clients.length}`);
+    console.log(
+      `Room Name: ${roomName} : Total Active Clients: ${client.room.clients.length}`
+    );
 
     // add this socket to the socket room;
     socket.join(client.room.roomName);
 
-
     //PLACEHOLDER.............. come back, we will get all current producer..
-    
 
-    cb({
+    ackCb({
       routerRtpCapabilities: client.room.router.rtpCapabilities,
-      newRoom
-    })
+      newRoom,
+    });
+  });
+
+  socket.on("requestedTransport", async ({ type }, ackCb) => {
+    //weather consumer or producer, clients need params
+    let clientTransportParams;
+
+    if (type === "producer") {
+      // run addClient, which is part of our Client class;
+      clientTransportParams = await client.addTransport(type);
+    } else if (type === "consumer") {
+    }
+
+    ackCb(clientTransportParams);
   });
 });
 

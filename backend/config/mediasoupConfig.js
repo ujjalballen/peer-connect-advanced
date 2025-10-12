@@ -85,6 +85,14 @@ const mediasoupConfig = {
       },
     ],
   },
+
+  webRtcTransport: {
+    //For a typical video stream with HD quality, you might set maxIncomingBitrate
+    //around 5 Mbps (5000 kbps) to balance quality and bandwidth.
+    //4K Ultra HD: 15 Mbps to 25 Mbps
+    maxIncomingBitrate: 5000000, // 5 Mbps, default is INF
+    initialAvailableOutgoingBitrate: 5000000, // 5 Mbps, default is 600000
+  },
 };
 
 export default mediasoupConfig;
