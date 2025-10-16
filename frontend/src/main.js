@@ -3,12 +3,11 @@ import buttons from "../uiStuff/uiButtons";
 import { io } from "socket.io-client";
 import * as mediasoupClient from "mediasoup-client";
 import createProducerTransport from "./mediaSoupFunctions/createProducerTransport";
+import createProducer from "./mediaSoupFunctions/createProducer";
 
 let device = null;
 let localStream = null;
 let producerTransport = null;
-
-
 
 const socket = io("http://localhost:3000");
 
@@ -41,8 +40,8 @@ const joinNewRoom = async () => {
     });
 
     console.log("device: ", device);
-//     const sctpCapabilities = device.sctpCapabilities;
-// console.log("sctpCapabilities: ", sctpCapabilities)
+    //     const sctpCapabilities = device.sctpCapabilities;
+    // console.log("sctpCapabilities: ", sctpCapabilities)
 
     buttons.control.classList.remove("d-none");
   } catch (error) {
@@ -60,23 +59,24 @@ const enableFeedStream = async () => {
       audio: true,
     });
 
-    console.log('localStream: ', localStream)
+    console.log("localStream: ", localStream);
 
     buttons.localMediaLeft.srcObject = localStream;
     buttons.enableFeed.disabled = true;
     buttons.sendFeed.disabled = false;
-
   } catch (error) {
     console.log("localStream error: ", error);
   }
 };
 
-
-const sendFeed = async() => {
+const sendFeed = async () => {
   // create a transport for THIS client's upstream(producerTransport)
   // it will handle both audio and video producers
-  producerTransport = await createProducerTransport(socket);
-
+  producerTransport = await createProducerTransport(socket, device);
+  
+  // console.log("Have producer Transport, Time to produce: ", producerTransport);
+  // Create our Producers
+  const producers = await createProducer(localStream, producerTransport);
 
 };
 
