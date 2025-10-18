@@ -25,25 +25,40 @@ const createProducerTransport = (socket, device) => {
 
         console.log("connect running on producer........");
 
-        const connectRes = await socket.emitWithAck('connectTransport', {dtlsParameters, type: "producer"})
-        console.log('connectRes is Back:', connectRes);
+        const connectRes = await socket.emitWithAck("connectTransport", {
+          dtlsParameters,
+          type: "producer",
+        });
+        console.log("connect event connectRes is Back:", connectRes);
 
-        if(connectRes === "success"){
+        if (connectRes === "success") {
           // we are connected. Move forward...
           callback();
-        }else if(connectRes === "error"){
+        } else if (connectRes === "error") {
           // producerTransport 'connect' event faild to connect..
           errback();
         }
       }
     );
 
-    producerTransport.on(
-      "produce",
-      async (parameters, callback, errback) => {
-        console.log("Producer is now ready to running..")
+    producerTransport.on("produce", async (parameters, callback, errback) => {
+      console.log("producerTransport produce EVENT is now ready to running..");
+
+      const { kind, rtpParameters } = parameters;
+
+      const produceRes = await socket.emitWithAck("startProducing", {
+        kind,
+        rtpParameters,
+      });
+      console.log("produce event produceRes is Back: ", produceRes);
+
+      if (produceRes === "error") {
+        errback();
+      } else{
+        // only other option is the producer id
+        callback({ id: produceRes.id });
       }
-    );
+    });
 
     resolve(producerTransport);
   });

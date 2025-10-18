@@ -8,6 +8,8 @@ import createProducer from "./mediaSoupFunctions/createProducer";
 let device = null;
 let localStream = null;
 let producerTransport = null;
+let videoProducer = null;
+let audioProducer = null;
 
 const socket = io("http://localhost:3000");
 
@@ -75,8 +77,14 @@ const sendFeed = async () => {
   producerTransport = await createProducerTransport(socket, device);
   
   // console.log("Have producer Transport, Time to produce: ", producerTransport);
-  // Create our Producers
+  // Create our Producers => video or audio or both
   const producers = await createProducer(localStream, producerTransport);
+  videoProducer = producers.videoProducer;
+  audioProducer = producers.audioProducer;
+
+  console.log("producers: ", producers)
+
+  buttons.hangUp.disabled = false;
 
 };
 

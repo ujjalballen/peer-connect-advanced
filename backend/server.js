@@ -104,27 +104,49 @@ io.on("connection", (socket) => {
     ackCb(clientTransportParams);
   });
 
+  socket.on("connectTransport", async ({ dtlsParameters, type }, ackCb) => {
+    if (type === "producer") {
+      if (!client.upstreamTransport) {
+        ackCb("error");
+        return;
+      }
 
-  socket.on('connectTransport', async({dtlsParameters, type}, ackCb) => {
-    if(type === "producer"){
+      try {
+        await client.upstreamTransport.connect({ dtlsParameters });
+        ackCb("success");
+      } catch (error) {
+        console.log("produer connectTransport error:", error);
+        ackCb("error");
+      }
+    } else if (type === "consumer") {
+    }
+  });
 
+  socket.on("startProducing", async ({ kind, rtpParameters }, ackCb) => {
+    // make a Producer with the rtpParameters we just send
+    try {
       if(!client.upstreamTransport){
-        ackCb('error');
+        ackCb("error");
         return;
       };
 
-      try {
-        await client.upstreamTransport.connect({dtlsParameters});
-        ackCb("success")
-      } catch (error) {
-        console.log("produer connectTransport error:", error);
-        ackCb("error")
-      }
+      const newProducer = await client.upstreamTransport.produce({
+        kind,
+        rtpParameters
+      });
 
-    }else if(type === "consumer"){
+      //we will send back with the id;
+      ackCb(newProducer.id)
 
+    } catch (error) {
+      console.log("produer startProducing error: ", error);
+      ackCb("error")
     }
-  })
+
+    //PLACEHOLDER 1: if this is an AudioTrack, then this is a new possible speaker
+    //PLACEHOLDER 2: if the room is populated, then let the connect peers know soneone Join
+
+  });
 });
 
 httpServer.listen(port, () => {
