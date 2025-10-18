@@ -37,7 +37,7 @@ class Client {
         initialAvailableOutgoingBitrate,
       });
 
-      console.log("webTRCServer from Client: ", this.room.worker.appData.webRtcServer)
+      // console.log("webTRCServer from Client: ", this.room.worker.appData.webRtcServer)
 
 
       if (maxIncomingBitrate) {

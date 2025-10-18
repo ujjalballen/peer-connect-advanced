@@ -103,6 +103,28 @@ io.on("connection", (socket) => {
 
     ackCb(clientTransportParams);
   });
+
+
+  socket.on('connectTransport', async({dtlsParameters, type}, ackCb) => {
+    if(type === "producer"){
+
+      if(!client.upstreamTransport){
+        ackCb('error');
+        return;
+      };
+
+      try {
+        await client.upstreamTransport.connect({dtlsParameters});
+        ackCb("success")
+      } catch (error) {
+        console.log("produer connectTransport error:", error);
+        ackCb("error")
+      }
+
+    }else if(type === "consumer"){
+
+    }
+  })
 });
 
 httpServer.listen(port, () => {

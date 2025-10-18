@@ -1,5 +1,5 @@
-const createProducerTransport = (socket, device) =>
-  new Promise(async (resolve, reject) => {
+const createProducerTransport = (socket, device) => {
+  return new Promise(async (resolve, reject) => {
     // ask the server to make a webRtcTransport/transport and send back params;
 
     const producerTransportParams = await socket.emitWithAck(
@@ -23,16 +23,30 @@ const createProducerTransport = (socket, device) =>
       async ({ dtlsParameters }, callback, errback) => {
         // send dtlsParameters to server
 
-        console.log("connect running on producer........")
+        console.log("connect running on producer........");
+
+        const connectRes = await socket.emitWithAck('connectTransport', {dtlsParameters, type: "producer"})
+        console.log('connectRes is Back:', connectRes);
+
+        if(connectRes === "success"){
+          // we are connected. Move forward...
+          callback();
+        }else if(connectRes === "error"){
+          // producerTransport 'connect' event faild to connect..
+          errback();
+        }
       }
     );
 
     producerTransport.on(
       "produce",
-      async (parameters, callback, errback) => {}
+      async (parameters, callback, errback) => {
+        console.log("Producer is now ready to running..")
+      }
     );
 
     resolve(producerTransport);
   });
+};
 
 export default createProducerTransport;
