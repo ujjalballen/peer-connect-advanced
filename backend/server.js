@@ -65,7 +65,7 @@ io.on("connection", (socket) => {
       requestedRoom = new Room(roomName, workerToUse);
       // console.log("get the Room OBJECT and its FN: ", requestedRoom);
 
-      await requestedRoom.createRouter();
+      await requestedRoom.createRouter(io);
 
       // push the new Room to the rooms object;
       rooms.push(requestedRoom);
@@ -130,10 +130,16 @@ io.on("connection", (socket) => {
         return;
       };
 
+
       const newProducer = await client.upstreamTransport.produce({
         kind,
         rtpParameters
       });
+
+
+      //add the producer to the Client object
+
+      client.addProducer(kind, newProducer)
 
       //we will send back with the id;
       ackCb(newProducer.id)

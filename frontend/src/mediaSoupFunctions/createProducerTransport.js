@@ -16,7 +16,7 @@ const createProducerTransport = (socket, device) => {
     // console.log("producerTransport: ", producerTransport)
 
     // When the producer transport tries to connect, mediasoup-client provides DTLS parameters.
-    // Send these DTLS parameters to the server so it can complete the WebRTC handshake
+    // Send these DTLS parameters to the server so it can complete the transport handshake
     // for this producer transport. After the server responds, call 'callback()' to finish the connection.
     producerTransport.on(
       "connect",

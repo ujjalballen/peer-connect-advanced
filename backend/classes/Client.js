@@ -10,7 +10,7 @@ class Client {
     // THIS Transport used for sending media streams
     this.upstreamTransport = null;
 
-    // we will have audio and video ||=> consumer
+    // we will have audio and video 
     this.producer = {};
 
     // Instead of calling it consumerTransport, call it downstream.
@@ -39,7 +39,6 @@ class Client {
 
       // console.log("webTRCServer from Client: ", this.room.worker.appData.webRtcServer)
 
-
       if (maxIncomingBitrate) {
         // maxIncomingBitrate limit the incoming bandwidth from this transport
         try {
@@ -56,16 +55,26 @@ class Client {
         dtlsParameters: transport.dtlsParameters,
       };
 
-
-      if(type === "producer"){
+      if (type === "producer") {
         // set the new transport to the client's upstreamTransport = producerTransport
         this.upstreamTransport = transport;
-      }else if(type === "consumer"){
-
+      } else if (type === "consumer") {
       }
 
-      resolve(clientTransportParams)
+      resolve(clientTransportParams);
     });
+  }
+
+  addProducer(kind, newProducer) {
+ 
+    this.producer[kind] = newProducer;
+
+    if (kind === "audio") {
+      // add this to our activeSpeakerObserver;
+      this.room.activeSpeakerObserver.addProducer({
+        producerId: newProducer.id
+      })
+    }
   }
 }
 

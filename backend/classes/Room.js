@@ -1,4 +1,5 @@
 import mediasoupConfig from "../config/mediasoupConfig.js";
+import newDominantSpeaker from "../utilitis/newDominantSpeaker.js";
 
 // Rooms are not a MediaSoup thing. MS cares about mediastreams, transports,
 // things like that. It doesn't care, or know, about rooms.
@@ -22,19 +23,25 @@ class Room {
     this.clients.push(client);
   }
 
-  async createRouter() {
-    try {
+  createRouter(io) {
+    return new Promise(async (resolve, reject) => {
       this.router = await this.worker.createRouter({
-        mediaCodecs: mediasoupConfig.routerOptions.mediaCodecs
+        mediaCodecs: mediasoupConfig.routerOptions.mediaCodecs,
       });
       console.log(`Router created for room: ${this.router}`);
-    } catch (err) {
-      console.error(`❌❌ Failed to create router for room ${this.roomName}:`, err);
-    //   throw err; // Let the caller handle the error
-    }
+
+      this.activeSpeakerObserver =
+        await this.router.createActiveSpeakerObserver({
+          interval: 300,
+        });
+
+      this.activeSpeakerObserver.on("dominantspeaker", (ds) =>
+        newDominantSpeaker(ds, this, io)
+      );
+
+      resolve()
+    });
   }
-
-
 }
 
 export default Room;
