@@ -17,7 +17,6 @@ socket.on("connect", () => {
   console.log("✅ Connected to server with id:", socket.id);
 });
 
-
 socket.on("disconnect", () => {
   console.log("❌ Disconnected from server");
 });
@@ -65,8 +64,10 @@ const enableFeedStream = async () => {
     console.log("localStream: ", localStream);
 
     buttons.localMediaLeft.srcObject = localStream;
+
     buttons.enableFeed.disabled = true;
     buttons.sendFeed.disabled = false;
+    buttons.muteBtn.disabled = false;
   } catch (error) {
     console.log("localStream error: ", error);
   }
@@ -76,19 +77,43 @@ const sendFeed = async () => {
   // create a transport for THIS client's upstream(producerTransport)
   // it will handle both audio and video producers
   producerTransport = await createProducerTransport(socket, device);
-  
+
   // console.log("Have producer Transport, Time to produce: ", producerTransport);
   // Create our Producers => video or audio or both
   const producers = await createProducer(localStream, producerTransport);
   videoProducer = producers.videoProducer;
   audioProducer = producers.audioProducer;
 
-  console.log("producers: ", producers)
+  console.log("producers: ", producers);
 
   buttons.hangUp.disabled = false;
+};
 
+const muteAudio = () => {
+  //mute at the producer level, to kee the transport and all
+  // other mechanism in place
+  if (audioProducer.paused) {
+    // currently paused. User wants to unpause
+    audioProducer.resume();
+    buttons.muteBtn.innerHTML = "Audio On";
+    buttons.muteBtn.classList.add("btn-success"); //turn it green
+    buttons.muteBtn.classList.remove("btn-danger"); //remove the red
+
+    // unpause on the server
+    socket.emit("audioChange", "unmute");
+  } else {
+    // currently on. User wants to pause
+    audioProducer.pause();
+    buttons.muteBtn.innerHTML = "Audio Muted";
+    buttons.muteBtn.classList.remove("btn-success"); //turn it green
+    buttons.muteBtn.classList.add("btn-danger"); //remove the red
+
+    // pause on the server
+    socket.emit("audioChange", "mute");
+  }
 };
 
 buttons.joinRoom.addEventListener("click", joinNewRoom);
 buttons.enableFeed.addEventListener("click", enableFeedStream);
 buttons.sendFeed.addEventListener("click", sendFeed);
+buttons.muteBtn.addEventListener("click", muteAudio);

@@ -66,8 +66,10 @@ class Client {
   }
 
   addProducer(kind, newProducer) {
- 
+
     this.producer[kind] = newProducer;
+    console.log('All Produer: ', this.producer)
+    console.log("Audio newProducer ID: ", newProducer.id)
 
     if (kind === "audio") {
       // add this to our activeSpeakerObserver;

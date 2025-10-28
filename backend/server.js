@@ -153,6 +153,20 @@ io.on("connection", (socket) => {
     //PLACEHOLDER 2: if the room is populated, then let the connect peers know soneone Join
 
   });
+
+
+  socket.on('audioChange', (typeOfChange) => {
+    console.log("Type: ", typeOfChange)
+
+    if(typeOfChange === "mute"){
+      client?.producer?.audio?.pause();
+    }else{
+      client?.producer?.audio?.resume();
+    }
+  });
+
+
+
 });
 
 httpServer.listen(port, () => {
