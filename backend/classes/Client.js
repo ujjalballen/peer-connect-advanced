@@ -10,7 +10,7 @@ class Client {
     // THIS Transport used for sending media streams
     this.upstreamTransport = null;
 
-    // we will have audio and video 
+    // we will have audio and video
     this.producer = {};
 
     // Instead of calling it consumerTransport, call it downstream.
@@ -58,6 +58,18 @@ class Client {
       if (type === "producer") {
         // set the new transport to the client's upstreamTransport = producerTransport
         this.upstreamTransport = transport;
+
+        setInterval(async () => {
+          const stats = await this.upstreamTransport.getStats();
+
+          for (const report of stats.values()) {
+            console.log(report.type);
+
+            if (report.type === "webrtc-transport") {
+              console.log(report.bytesReceived, "-", report.rtpBytesReceived);
+            }
+          }
+        }, 1000);
       } else if (type === "consumer") {
       }
 
@@ -66,16 +78,13 @@ class Client {
   }
 
   addProducer(kind, newProducer) {
-
     this.producer[kind] = newProducer;
-    console.log('All Produer: ', this.producer)
-    console.log("Audio newProducer ID: ", newProducer.id)
 
     if (kind === "audio") {
       // add this to our activeSpeakerObserver;
       this.room.activeSpeakerObserver.addProducer({
-        producerId: newProducer.id
-      })
+        producerId: newProducer.id,
+      });
     }
   }
 }

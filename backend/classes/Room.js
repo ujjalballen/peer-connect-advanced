@@ -35,7 +35,7 @@ class Room {
           interval: 300,
         });
 
-      this.activeSpeakerObserver.on("dominantspeaker", (ds) =>
+      this.activeSpeakerObserver.on("dominantspeaker", ds =>
         newDominantSpeaker(ds, this, io)
       );
 

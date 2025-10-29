@@ -80,6 +80,7 @@ io.on("connection", (socket) => {
       `Room Name: ${roomName} : Total Active Clients: ${client.room.clients.length}`
     );
 
+
     // add this socket to the socket room;
     socket.join(client.room.roomName);
 
