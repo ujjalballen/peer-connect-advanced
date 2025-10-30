@@ -109,7 +109,7 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("requestedTransport", async ({ type }, ackCb) => {
+  socket.on("requestedTransport", async ({ type, audioPid }, ackCb) => {
     //weather consumer or producer, clients need params
     let clientTransportParams;
 
@@ -117,6 +117,9 @@ io.on("connection", (socket) => {
       // run addClient, which is part of our Client class;
       clientTransportParams = await client.addTransport(type);
     } else if (type === "consumer") {
+      const producingClient = client.room.clients.find(c => c?.producer?.audio?.id === audioPid);
+      const videoPid = producingClient?.producer?.video?.id
+      clientTransportParams = await client.addTransport(type, audioPid, videoPid)
     }
 
     ackCb(clientTransportParams);

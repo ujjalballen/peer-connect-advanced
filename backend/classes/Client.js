@@ -25,7 +25,7 @@ class Client {
     this.room = null; // this will be a Room object
   }
 
-  addTransport(type) {
+  addTransport(type, audioPid = null, videoPid = null) {
     return new Promise(async (resolve, reject) => {
       const { initialAvailableOutgoingBitrate, maxIncomingBitrate } =
         mediasoupConfig.webRtcTransport;
@@ -85,6 +85,12 @@ class Client {
 
 
       } else if (type === "consumer") {
+        this.downstreamTransports.push({
+          transport,
+          associatedVideoPid: videoPid,
+          associatedAudioPid: audioPid,
+
+        })
       }
 
       resolve(clientTransportParams);

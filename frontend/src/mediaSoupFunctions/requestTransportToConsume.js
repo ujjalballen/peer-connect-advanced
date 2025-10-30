@@ -1,12 +1,15 @@
 const requestedTransportToConsume = (consumeDatas, socket, device) => {
+  consumeDatas.audioPidsToCreate.forEach(async (audioPid, i) => {
+    const videoPid = consumeDatas.videoPidsToCreate[i];
+    const consumerTransport = await socket.emitWithAck("requestedTransport", {
+      type: "consumer",
+      audioPid,
+    });
 
-    consumeDatas.audioPidsToCreate.forEach(async(audioPid, i) => {
-        const videoPid = consumeDatas.videoPidsToCreate[i];
-        const consumerTransport = await socket.emitWithAck(
-      "requestedTransport",
-      { type: "producer" }
-    );
-    })
+
+    console.log('consumerTransport', consumerTransport)
+
+  });
 };
 
 export default requestedTransportToConsume;

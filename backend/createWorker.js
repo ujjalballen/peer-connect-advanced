@@ -23,32 +23,32 @@ export default async function createWorker() {
     });
 
     // Clone base WebRtcServer options
-    const webRtcServerOptions = JSON.parse(
-      JSON.stringify(mediasoupConfig.webRtcServerOptions)
-    );
+    // const webRtcServerOptions = JSON.parse(
+    //   JSON.stringify(mediasoupConfig.webRtcServerOptions)
+    // );
 
-    // console.log("webRtcServerOptions", webRtcServerOptions);
+    // // console.log("webRtcServerOptions", webRtcServerOptions);
 
-    // Increment port manually for each worker
-    for (const listenInfo of webRtcServerOptions.listenInfos) {
-      listenInfo.port += i;
+    // // Increment port manually for each worker
+    // for (const listenInfo of webRtcServerOptions.listenInfos) {
+    //   listenInfo.port += i;
 
-      // console.log("webRtcServerOptions", webRtcServerOptions);
-    }
+    //   // console.log("webRtcServerOptions", webRtcServerOptions);
+    // }
 
-    // Create WebRtcServer with unique ports
-    const webRtcServer = await worker.createWebRtcServer(webRtcServerOptions);
+    // // Create WebRtcServer with unique ports
+    // const webRtcServer = await worker.createWebRtcServer(webRtcServerOptions);
 
-    // console.log("webRtcServer: ", webRtcServer);
+    // // console.log("webRtcServer: ", webRtcServer);
 
-    // Attach the server to the worker's appData for reference
-    worker.appData.webRtcServer = webRtcServer;
+    // // Attach the server to the worker's appData for reference
+    // worker.appData.webRtcServer = webRtcServer;
 
     mediasoupWorkers.push(worker);
 
-    console.log(
-      `Worker ${i} created. WebRtcServer UDP/TCP port: ${webRtcServerOptions.listenInfos[0].port}`
-    );
+    // console.log(
+    //   `Worker ${i} created. WebRtcServer UDP/TCP port: ${webRtcServerOptions.listenInfos[0].port}`
+    // );
 
     // Inside your for-loop after worker + webRtcServer setup
     // setInterval(async () => {
