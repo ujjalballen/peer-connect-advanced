@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 import * as mediasoupClient from "mediasoup-client";
 import createProducerTransport from "./mediaSoupFunctions/createProducerTransport";
 import createProducer from "./mediaSoupFunctions/createProducer";
+import requestedTransportToConsume from "./mediaSoupFunctions/requestTransportToConsume";
 
 let device = null;
 let localStream = null;
@@ -33,6 +34,7 @@ const joinNewRoom = async () => {
   });
 
   console.log("joinRoom", joinRoomResp);
+  requestedTransportToConsume(joinRoomResp, socket, device)
 
   try {
     device = await mediasoupClient.Device.factory();

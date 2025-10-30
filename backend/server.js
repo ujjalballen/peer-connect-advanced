@@ -74,21 +74,38 @@ io.on("connection", (socket) => {
     // add the new room to the client Object;
     client.room = requestedRoom;
 
+    console.log("client.Room: ", client.room);
+    console.log("Full Client: ", client);
+
     // add the client to the Room clients;
     client.room.addClient(client);
     console.log(
       `Room Name: ${roomName} : Total Active Clients: ${client.room.clients.length}`
     );
 
-
     // add this socket to the socket room;
     socket.join(client.room.roomName);
 
-    //PLACEHOLDER.............. come back, we will get all current producer..
+    // get the first 5 speakers from activeSpeakerList
+    const audioPidsToCreate = client.room.activeSpeakerList.slice(0, 5);
+    const videoPidsToCreate = audioPidsToCreate.map(audioPid => {
+      const getClient = client.room.clients.find(c => c?.producer?.audio?.id === audioPid);
+      return getClient?.producer?.video?.id
+    })
+
+    const associatedUsername = audioPidsToCreate.map(audioPid => {
+      const getClient = client.room.clients.find(c => c?.producer?.audio?.id === audioPid);
+      return getClient?.userName;
+    })
+
+
 
     ackCb({
       routerRtpCapabilities: client.room.router.rtpCapabilities,
       newRoom,
+      audioPidsToCreate,
+      videoPidsToCreate,
+      associatedUsername
     });
   });
 
@@ -126,48 +143,40 @@ io.on("connection", (socket) => {
   socket.on("startProducing", async ({ kind, rtpParameters }, ackCb) => {
     // make a Producer with the rtpParameters we just send
     try {
-      if(!client.upstreamTransport){
+      if (!client.upstreamTransport) {
         ackCb("error");
         return;
-      };
-
+      }
 
       const newProducer = await client.upstreamTransport.produce({
         kind,
-        rtpParameters
+        rtpParameters,
       });
-
 
       //add the producer to the Client object
 
-      client.addProducer(kind, newProducer)
+      client.addProducer(kind, newProducer);
 
       //we will send back with the id;
-      ackCb(newProducer.id)
-
+      ackCb(newProducer.id);
     } catch (error) {
       console.log("produer startProducing error: ", error);
-      ackCb("error")
+      ackCb("error");
     }
 
     //PLACEHOLDER 1: if this is an AudioTrack, then this is a new possible speaker
     //PLACEHOLDER 2: if the room is populated, then let the connect peers know soneone Join
-
   });
 
+  socket.on("audioChange", (typeOfChange) => {
+    console.log("Type: ", typeOfChange);
 
-  socket.on('audioChange', (typeOfChange) => {
-    console.log("Type: ", typeOfChange)
-
-    if(typeOfChange === "mute"){
+    if (typeOfChange === "mute") {
       client?.producer?.audio?.pause();
-    }else{
+    } else {
       client?.producer?.audio?.resume();
     }
   });
-
-
-
 });
 
 httpServer.listen(port, () => {

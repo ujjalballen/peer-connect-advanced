@@ -30,10 +30,22 @@ class Client {
       const { initialAvailableOutgoingBitrate, maxIncomingBitrate } =
         mediasoupConfig.webRtcTransport;
       const transport = await this.room.router.createWebRtcTransport({
-        webRtcServer: this.room.worker.appData.webRtcServer,
+        // webRtcServer: this.room.worker.appData.webRtcServer,
         enableUdp: true,
         enableTcp: true, // used used UDP, unless we can't;
         preferUdp: true,
+        listenInfos: [
+          {
+            protocol: "udp",
+            ip: "127.0.0.1", // we can used 127.0.0.1 AND 192.168.0.111 for local test; 0.0.0.0 for global
+            // announcedAddress: "video-call-lali.onrender.com", // your server’s public IP or domain
+          },
+          {
+            protocol: "tcp",
+            ip: "127.0.0.1", // we can used 127.0.0.1 AND 192.168.0.111 for local test
+            // announcedAddress: "video-call-lali.onrender.com", // your server’s public IP or domain
+          },
+        ],
         initialAvailableOutgoingBitrate,
       });
 
@@ -59,17 +71,19 @@ class Client {
         // set the new transport to the client's upstreamTransport = producerTransport
         this.upstreamTransport = transport;
 
-        setInterval(async () => {
-          const stats = await this.upstreamTransport.getStats();
+        // setInterval(async () => {
+        //   const stats = await this.upstreamTransport.getStats();
 
-          for (const report of stats.values()) {
-            console.log(report.type);
+        //   for (const report of stats.values()) {
+        //     console.log(report.type);
 
-            if (report.type === "webrtc-transport") {
-              console.log(report.bytesReceived, "-", report.rtpBytesReceived);
-            }
-          }
-        }, 1000);
+        //     if (report.type === "webrtc-transport") {
+        //       console.log(report.bytesReceived, "-", report.rtpBytesReceived);
+        //     }
+        //   }
+        // }, 1000);
+
+
       } else if (type === "consumer") {
       }
 
