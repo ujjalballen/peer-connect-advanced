@@ -74,8 +74,8 @@ io.on("connection", (socket) => {
     // add the new room to the client Object;
     client.room = requestedRoom;
 
-    console.log("client.Room: ", client.room);
-    console.log("Full Client: ", client);
+    // console.log("client.Room: ", client.room);
+    // console.log("Full Client: ", client);
 
     // add the client to the Room clients;
     client.room.addClient(client);

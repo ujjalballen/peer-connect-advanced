@@ -34,18 +34,13 @@ class Client {
         enableUdp: true,
         enableTcp: true, // used used UDP, unless we can't;
         preferUdp: true,
-        listenInfos: [
-          {
-            protocol: "udp",
-            ip: "127.0.0.1", // we can used 127.0.0.1 AND 192.168.0.111 for local test; 0.0.0.0 for global
-            // announcedAddress: "video-call-lali.onrender.com", // your server’s public IP or domain
-          },
-          {
-            protocol: "tcp",
-            ip: "127.0.0.1", // we can used 127.0.0.1 AND 192.168.0.111 for local test
-            // announcedAddress: "video-call-lali.onrender.com", // your server’s public IP or domain
-          },
-        ],
+        listenIps: [
+        {
+          ip: '127.0.0.1', //anywhere
+          announcedIp: null // replace by public IP address
+          // announcedIp: '76.97.119.246',
+        }
+      ],
         initialAvailableOutgoingBitrate,
       });
 
