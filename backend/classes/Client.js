@@ -35,12 +35,12 @@ class Client {
         enableTcp: true, // used used UDP, unless we can't;
         preferUdp: true,
         listenIps: [
-        {
-          ip: '127.0.0.1', //anywhere
-          announcedIp: null // replace by public IP address
-          // announcedIp: '76.97.119.246',
-        }
-      ],
+          {
+            ip: "127.0.0.1", //anywhere
+            announcedIp: null, // replace by public IP address
+            // announcedIp: '76.97.119.246',
+          },
+        ],
         initialAvailableOutgoingBitrate,
       });
 
@@ -77,15 +77,12 @@ class Client {
         //     }
         //   }
         // }, 1000);
-
-
       } else if (type === "consumer") {
         this.downstreamTransports.push({
           transport,
           associatedVideoPid: videoPid,
           associatedAudioPid: audioPid,
-
-        })
+        });
       }
 
       resolve(clientTransportParams);
@@ -101,6 +98,10 @@ class Client {
         producerId: newProducer.id,
       });
     }
+  }
+
+  addConsumer(kind, newConsumer, downstreamTransport) {
+    downstreamTransport[kind] = newConsumer
   }
 }
 

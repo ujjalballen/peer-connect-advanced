@@ -88,24 +88,26 @@ io.on("connection", (socket) => {
 
     // get the first 5 speakers from activeSpeakerList
     const audioPidsToCreate = client.room.activeSpeakerList.slice(0, 5);
-    const videoPidsToCreate = audioPidsToCreate.map(audioPid => {
-      const getClient = client.room.clients.find(c => c?.producer?.audio?.id === audioPid);
-      return getClient?.producer?.video?.id
-    })
+    const videoPidsToCreate = audioPidsToCreate.map((audioPid) => {
+      const getClient = client.room.clients.find(
+        (c) => c?.producer?.audio?.id === audioPid
+      );
+      return getClient?.producer?.video?.id;
+    });
 
-    const associatedUsername = audioPidsToCreate.map(audioPid => {
-      const getClient = client.room.clients.find(c => c?.producer?.audio?.id === audioPid);
+    const associatedUsername = audioPidsToCreate.map((audioPid) => {
+      const getClient = client.room.clients.find(
+        (c) => c?.producer?.audio?.id === audioPid
+      );
       return getClient?.userName;
-    })
-
-
+    });
 
     ackCb({
       routerRtpCapabilities: client.room.router.rtpCapabilities,
       newRoom,
       audioPidsToCreate,
       videoPidsToCreate,
-      associatedUsername
+      associatedUsername,
     });
   });
 
@@ -117,9 +119,15 @@ io.on("connection", (socket) => {
       // run addClient, which is part of our Client class;
       clientTransportParams = await client.addTransport(type);
     } else if (type === "consumer") {
-      const producingClient = client.room.clients.find(c => c?.producer?.audio?.id === audioPid);
-      const videoPid = producingClient?.producer?.video?.id
-      clientTransportParams = await client.addTransport(type, audioPid, videoPid)
+      const producingClient = client.room.clients.find(
+        (c) => c?.producer?.audio?.id === audioPid
+      );
+      const videoPid = producingClient?.producer?.video?.id;
+      clientTransportParams = await client.addTransport(
+        type,
+        audioPid,
+        videoPid
+      );
     }
 
     ackCb(clientTransportParams);
@@ -178,6 +186,46 @@ io.on("connection", (socket) => {
       client?.producer?.audio?.pause();
     } else {
       client?.producer?.audio?.resume();
+    }
+  });
+
+  socket.on("consumeMedia", async ({ rtpCapabilities, pid, kind }, ackCb) => {
+    try {
+      if (
+        !client.room.router.canConsume({ producerId: pid, rtpCapabilities })
+      ) {
+        ackCb("canNotConsume");
+      } else {
+        const downstreamTransport = client.downstreamTransports.find((t) => {
+          if (kind === "audio") {
+            return t.associatedAudioPid === pid;
+          } else if (kind === "video") {
+            return t.associatedVideoPid === pid;
+          }
+        });
+
+        const newConsumer = downstreamTransport.transport.consume({
+          producerId: pid,
+          rtpCapabilities,
+          paused: true
+
+        })
+
+        client.addConsumer(kind, newConsumer, downstreamTransport);
+
+        const clientParams = {
+          producerId: pid,
+          id: newConsumer.id,
+          kind: newConsumer.kind,
+          rtpParameters: newConsumer.rtpParameters
+        };
+
+        ackCb(clientParams)
+
+      }
+    } catch (error) {
+      console.log(error);
+      ackCb("consumeFaild");
     }
   });
 });
