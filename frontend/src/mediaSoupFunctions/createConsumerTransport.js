@@ -1,20 +1,33 @@
 const createConsumerTransport = (transportParams, device, socket, audioPid) => {
-const consumerTransport = device.createRecvTransport(transportParams);
+  const consumerTransport = device.createRecvTransport(transportParams);
 
-consumerTransport.on('connectionstatechange', (state) => {
-console.log('connectionstatechange', state)
-});
+  consumerTransport.on("connectionstatechange", (state) => {
+    console.log("connectionstatechange", state);
+  });
 
-consumerTransport.on('icegatheringstatechange', (state) => {
-console.log('icegatheringstatechange', state)
-});
+  consumerTransport.on("icegatheringstatechange", (state) => {
+    console.log("icegatheringstatechange", state);
+  });
 
+  // consumer transport connect listener......fire...
 
-// consumer transport connect listener......fire...
+  consumerTransport.on(
+    "connect",
+    async ({ dtlsParameters }, callback, errback) => {
+        console.log("Consumer tarnsport has been fired!")
 
-consumerTransport.on('connect', async({ dtlsParameters }, callback, errback) => {
+        const connectResp = await socket.emitWithAck('connectTransport', {dtlsParameters, type:"consumer", audioPid});
 
-})
+        if(connectResp === 'success'){
+            callback()
+        }else{
+            errback()
+        }
+
+    }
+  );
+
+  return consumerTransport;
 
 };
 

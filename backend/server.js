@@ -133,23 +133,38 @@ io.on("connection", (socket) => {
     ackCb(clientTransportParams);
   });
 
-  socket.on("connectTransport", async ({ dtlsParameters, type }, ackCb) => {
-    if (type === "producer") {
-      if (!client.upstreamTransport) {
-        ackCb("error");
-        return;
-      }
+  socket.on(
+    "connectTransport",
+    async ({ dtlsParameters, type, audioPid }, ackCb) => {
+      if (type === "producer") {
+        if (!client.upstreamTransport) {
+          ackCb("error");
+          return;
+        }
 
-      try {
-        await client.upstreamTransport.connect({ dtlsParameters });
-        ackCb("success");
-      } catch (error) {
-        console.log("produer connectTransport error:", error);
-        ackCb("error");
+        try {
+          await client.upstreamTransport.connect({ dtlsParameters });
+          ackCb("success");
+        } catch (error) {
+          console.log("produer connectTransport error:", error);
+          ackCb("error");
+        }
+      } else if (type === "consumer") {
+        try {
+          const downstreamTransport = client.downstreamTransports.find((t) => {
+            return t.associatedAudioPid === audioPid;
+          });
+
+          downstreamTransport.transport.connect({ dtlsParameters });
+
+          ackCb("success");
+        } catch (error) {
+          console.log(error);
+          ackCb("error");
+        }
       }
-    } else if (type === "consumer") {
     }
-  });
+  );
 
   socket.on("startProducing", async ({ kind, rtpParameters }, ackCb) => {
     // make a Producer with the rtpParameters we just send
@@ -207,9 +222,8 @@ io.on("connection", (socket) => {
         const newConsumer = downstreamTransport.transport.consume({
           producerId: pid,
           rtpCapabilities,
-          paused: true
-
-        })
+          paused: true,
+        });
 
         client.addConsumer(kind, newConsumer, downstreamTransport);
 
@@ -217,16 +231,24 @@ io.on("connection", (socket) => {
           producerId: pid,
           id: newConsumer.id,
           kind: newConsumer.kind,
-          rtpParameters: newConsumer.rtpParameters
+          rtpParameters: newConsumer.rtpParameters,
         };
 
-        ackCb(clientParams)
-
+        ackCb(clientParams);
       }
     } catch (error) {
       console.log(error);
       ackCb("consumeFaild");
     }
+  });
+
+  socket.on("unpausedConsumer", async ({ pid, kind }, ackCb) => {
+    const consumerToConsume = client.downstreamTransports.find((t) => {
+      return t?.[kind].producerId === pid;
+    });
+
+    await consumerToConsume[kind].resume();
+    ackCb()
   });
 });
 

@@ -11,6 +11,7 @@ let localStream = null;
 let producerTransport = null;
 let videoProducer = null;
 let audioProducer = null;
+let consumers = {};
 
 const socket = io("http://localhost:3000");
 
@@ -34,7 +35,7 @@ const joinNewRoom = async () => {
   });
 
   console.log("joinRoom", joinRoomResp);
-  requestedTransportToConsume(joinRoomResp, socket, device)
+  requestedTransportToConsume(joinRoomResp, socket, device, consumers)
 
   try {
     device = await mediasoupClient.Device.factory();
