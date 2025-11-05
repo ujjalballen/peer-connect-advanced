@@ -4,27 +4,59 @@ const updateActiveSpeakers = (room, io) => {
 
   const newTransportByPeers = {};
 
-  room.clients.forEach(client => {
+  room.clients.forEach((client) => {
+    mutedSpeakers.forEach((pid) => {
+      if (client?.producer?.id === pid) {
+        client.producer?.audio.pause();
+        client.producer?.video.pause();
+        return;
+      }
 
-    mutedSpeakers.forEach(pid => {
-        if(client?.producer?.id === pid){
-            client.producer?.audio.pause();
-            client.producer?.video.pause();
-            return;
-        }
+      const downstreamToStop = client.downstreamTransports.find(
+        (t) => t?.audio?.producerId === pid
+      );
 
-        const downstreamToStop = client.downstreamTransports.find(t => t?.audio?.producerId === pid);
+      if (downstreamToStop) {
+        downstreamToStop.audio.pause();
+        downstreamToStop.video.pause();
+      }
+    });
+
+    const newSpeakerToThisClient = [];
+
+    activeSpeakers.forEach((pid) => {
+      if (client?.producer?.id === pid) {
+        client.producer?.audio.resume();
+        client.producer?.video.resume();
+        return;
+      };
+
+       const downstreamToStart = client.downstreamTransports.find(
+        (t) => t?.associatedAudioPid === pid
+      );
+
+      if(downstreamToStart){
+        downstreamToStart.audio.resume()
+        downstreamToStart.video.resume()
+      }else{
+        newSpeakerToThisClient.push(pid)
+      }
 
 
-        if(downstreamToStop){
-            downstreamToStop.audio.pause()
-            downstreamToStop.video.pause()
-        }
 
-    })
+
+
+    });
+
+    if(newSpeakerToThisClient.length){
+      newTransportByPeers(client.socket.id) = newSpeakerToThisClient;
+    };
+
   });
 
+  io.to(room.roomName).emit('updateActiveSpeakers', activeSpeakers);
 
+  return newTransportByPeers;
 };
 
 export default updateActiveSpeakers;
