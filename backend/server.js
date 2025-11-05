@@ -8,6 +8,7 @@ import mediasoupConfig from "./config/mediasoupConfig.js";
 import Client from "./classes/Client.js";
 import Room from "./classes/Room.js";
 import getWorker from "./getWorker.js";
+import updateActiveSpeakers from "./utilitis/updateActiveSpeakers.js";
 
 const app = express();
 const port = process.env.PROT || 3000;
@@ -183,6 +184,10 @@ io.on("connection", (socket) => {
 
       client.addProducer(kind, newProducer);
 
+      if(kind === 'audio'){
+        client.room.activeSpeakerList.push(newProducer.id)
+      };
+
       //we will send back with the id;
       ackCb(newProducer.id);
     } catch (error) {
@@ -190,8 +195,7 @@ io.on("connection", (socket) => {
       ackCb("error");
     }
 
-    //PLACEHOLDER 1: if this is an AudioTrack, then this is a new possible speaker
-    //PLACEHOLDER 2: if the room is populated, then let the connect peers know soneone Join
+    const newTransportByPeers = updateActiveSpeakers(client.room, io)
   });
 
   socket.on("audioChange", (typeOfChange) => {

@@ -10,7 +10,7 @@ class Client {
     // THIS Transport used for sending media streams
     this.upstreamTransport = null;
 
-    // we will have audio and video
+    // we will have audio and video consumer
     this.producer = {};
 
     // Instead of calling it consumerTransport, call it downstream.
