@@ -43,9 +43,6 @@ const updateActiveSpeakers = (room, io) => {
       }
 
 
-
-
-
     });
 
     if(newSpeakerToThisClient.length){

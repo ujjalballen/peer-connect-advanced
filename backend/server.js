@@ -184,9 +184,9 @@ io.on("connection", (socket) => {
 
       client.addProducer(kind, newProducer);
 
-      if(kind === 'audio'){
-        client.room.activeSpeakerList.push(newProducer.id)
-      };
+      if (kind === "audio") {
+        client.room.activeSpeakerList.push(newProducer.id);
+      }
 
       //we will send back with the id;
       ackCb(newProducer.id);
@@ -195,7 +195,33 @@ io.on("connection", (socket) => {
       ackCb("error");
     }
 
-    const newTransportByPeers = updateActiveSpeakers(client.room, io)
+    const newTransportByPeers = updateActiveSpeakers(client.room, io);
+
+    for (const [socketId, audioPidsToCreate] of Object.entries(
+      newTransportByPeers
+    )) {
+      const videoPidsToCreate = audioPidsToCreate.map((aPid) => {
+        const producerClient = client.room.clients.find(
+          (c) => c?.producer?.audio.id === aPid
+        );
+        return producerClient?.producer?.video?.id;
+      });
+
+      const associatedUsername = audioPidsToCreate.map((aPid) => {
+        const producerClient = client.room.clients.find(
+          (c) => c?.producer?.audio.id === aPid
+        );
+        return producerClient?.userName;
+      });
+
+      io.to(socketId).emit("newProducersToConsumer", {
+        routerRtpCapabilities: client.room.router.rtpCapabilities,
+        audioPidsToCreate,
+        videoPidsToCreate,
+        associatedUsername,
+        activeSpeakerList: client.room.activeSpeakerList.slice(0, 5)
+      });
+    }
   });
 
   socket.on("audioChange", (typeOfChange) => {
@@ -252,7 +278,7 @@ io.on("connection", (socket) => {
     });
 
     await consumerToConsume[kind].resume();
-    ackCb()
+    ackCb();
   });
 });
 
