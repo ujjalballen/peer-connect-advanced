@@ -1,4 +1,7 @@
 // here room is our full Room Object or Room Class, we pass that Room as this and not give a name
+
+import updateActiveSpeakers from "./updateActiveSpeakers"
+
 // ds = dominant Speaker
 function newDominantSpeaker(ds,room,io){
     console.log('======ds======',ds.producer.id)
@@ -16,6 +19,34 @@ function newDominantSpeaker(ds,room,io){
     console.log(room.activeSpeakerList)
     // PLACEHOLDER - the activeSpeakerlist has changed!
     // updateActiveSpeakers = mute/unmute/get new transports
+
+    const newTransportByPeers = updateActiveSpeakers(room, io);
+
+    for (const [socketId, audioPidsToCreate] of Object.entries(
+      newTransportByPeers
+    )) {
+      const videoPidsToCreate = audioPidsToCreate.map((aPid) => {
+        const producerClient = room.clients.find(
+          (c) => c?.producer?.audio.id === aPid
+        );
+        return producerClient?.producer?.video?.id;
+      });
+
+      const associatedUsername = audioPidsToCreate.map((aPid) => {
+        const producerClient = room.clients.find(
+          (c) => c?.producer?.audio.id === aPid
+        );
+        return producerClient?.userName;
+      });
+
+      io.to(socketId).emit("newProducersToConsumer", {
+        routerRtpCapabilities: room.router.rtpCapabilities,
+        audioPidsToCreate,
+        videoPidsToCreate,
+        associatedUsername,
+        activeSpeakerList: room.activeSpeakerList.slice(0, 5)
+      });
+    }
 
 
 };
