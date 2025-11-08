@@ -23,6 +23,30 @@ socket.on("disconnect", () => {
   console.log("❌ Disconnected from server");
 });
 
+socket.on("updateActiveSpeakers", async (newListOfActives) => {
+  let slot = 0;
+
+  const remoteEls = document.getElementsByClassName(".remote-video");
+  for (let el of remoteEls) {
+    el.srcObject = null;
+  }
+
+  newListOfActives.forEach((aid) => {
+    if (aid !== audioProducer?.id) {
+      const remoteVideo = document.getElementById(`remote-video-${slot}`);
+      const remoteVideoUsername = document.getElementById(`username-${slot}`);
+      const conumerForThisSlot = consumers[aid];
+      remoteVideo.srcObject = conumerForThisSlot?.combainedStream;
+      remoteVideoUsername.innerHTML = conumerForThisSlot?.userName;
+      slot++
+    }
+  });
+});
+
+socket.on("newProducersToConsume", () => (consumeData) => {
+  requestTransportToConsume(consumeData, socket, device, consumers);
+});
+
 const joinNewRoom = async () => {
   const roomName = document.getElementById("room-input").value;
   const userName = document.getElementById("username").value;
@@ -35,7 +59,7 @@ const joinNewRoom = async () => {
   });
 
   console.log("joinRoom", joinRoomResp);
-  requestedTransportToConsume(joinRoomResp, socket, device, consumers)
+  requestedTransportToConsume(joinRoomResp, socket, device, consumers);
 
   try {
     device = await mediasoupClient.Device.factory();

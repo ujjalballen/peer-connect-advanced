@@ -39,7 +39,7 @@ function newDominantSpeaker(ds,room,io){
         return producerClient?.userName;
       });
 
-      io.to(socketId).emit("newProducersToConsumer", {
+      io.to(socketId).emit("newProducersToConsume", {
         routerRtpCapabilities: room.router.rtpCapabilities,
         audioPidsToCreate,
         videoPidsToCreate,
